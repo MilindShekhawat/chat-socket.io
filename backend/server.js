@@ -2,6 +2,7 @@ import express from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 
+let chats = []
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -11,15 +12,16 @@ const io = new Server(server, {
 })
 
 io.on("connection", (socket) => {
-  console.log("User connected")
+  console.log("User connected", socket.id)
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
+  socket.on("disconnect", () => {
+    console.log("User disconnected", socket.id);
   });
 
   socket.on("chat", (payload) => {
-    console.log("Payload:", payload)
-    io.emit("chat", payload)
+    chats.push(payload)
+    console.log("Chats:", chats)
+    io.emit("chat", chats)
   })
 })
 
