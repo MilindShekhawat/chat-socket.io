@@ -26,7 +26,7 @@ io.on("connection", (socket) => {
   socket.on("chat", (payload) => {
     chats.push(payload)
     console.log("Chats:", chats)
-    io.to(payload.room).emit("chat", chats)
+    io.to(payload.room).emit("chat", chats.filter((chats) => payload.room === chats.room))
   })
 })
 
