@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 
 let chats = []
+let rooms = []
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -12,15 +13,26 @@ const io = new Server(server, {
 })
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id)
+  console.log("User connected:", [socket.id])
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id)
-  });
+    console.log("User disconnected:", [socket.id])
+  })
+
+  socket.on("create room", (room) => {
+    console.log("Room", [room], "created by", [socket.id])
+    //socket.emit("join room", room);
+    rooms.push(room)
+  })
 
   socket.on("join room" , (Room) => {
-    console.log("Room created:", Room)
-    socket.join(Room);
+    if(rooms.includes(Room)) {
+      console.log("Room", [Room], "joined  by", [socket.id])
+      socket.join(Room);
+      socket.emit("join room", Room);
+    } else {
+      socket.emit("room not found");
+    }
   })
 
   socket.on("chat", (payload) => {
