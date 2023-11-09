@@ -8,58 +8,46 @@ export default function chatroom() {
   const [message, setMessage] = useState('')
   const [messageArray, setMessageArray] = useState([])
   const searchParams = useSearchParams()
-  const room = searchParams.get('room')
+  const roomId = searchParams.get('room')
   const userName = searchParams.get('user')
-  
-  const sendMessage = (e) => {
-    //e.preventDefault()
+
+  useEffect(() => {
+    //? these let us join the room by copying url
+    socket.emit('username', {userName, roomId})
+    socket.emit('join room', {userName, roomId})
+    socket.emit('chat', {roomId})
+    socket.on('chat', (chats) => {
+      setMessageArray(chats)
+      console.log("Messages----", chats)
+    })
+  }, [])
+
+  const sendMessage = () => {
     console.log(userName)
-    socket.emit('chat', {message , userName, room})
+    socket.emit('chat', {message , userName, roomId})
     console.log("got data")
     socket.on('chat', (chats) => {
       setMessageArray(chats)
       console.log("Messages----", chats)
     })
     setMessage('')
-  }
+  } 
 
-  useEffect(() => {
-    console.log("got data")
-    socket.on('chat', (chats) => {
-      setMessageArray(chats)
-      console.log("Messages----", chats)
-    })
-  }, [])
   
   return (
     <div className="flex flex-col border-2 border-black rounded-md w-[30vw] min-w-[320px] h-[95vh] mx-auto my-4">
       <div className='flex flex-col gap-3 p-3'>
-            {/* style */}
-            <div  className="flex flex-col w-fit max-w-xs bg-black rounded-md border-2 border-black">
-              <span className="pl-2 pr-3 text-yellow-400 text-sm font-bold">
-                payload.userName
-              </span>
-              <span className="bg-white pl-2 pr-3 py-1 rounded-[4px]">
-                payload.message
-              </span>
-            </div>
-        <div className="flex flex-col max-w-xs bg-black rounded-md border-2 border-black self-end">
-          {/* <div className="pl-2 pr-3 w-max text-red-400 text-sm font-bold">
-            Milind
-          </div> */}
-          <div className="bg-white pl-2 pr-3 py-1 rounded-[4px]">
-            User 2's message.
-          </div>
-        </div>
         {messageArray.map((payload, index) => (
-          <div key={index} className="flex flex-col w-fit max-w-xs bg-black rounded-md border-2 border-black">
-            <span className="pl-2 pr-3 text-yellow-400 text-sm font-bold">
-              {payload.userName}
-            </span>
-            <span className="bg-white pl-2 pr-3 py-1 rounded-[4px]">
-              {payload.message}
-            </span>
+          payload.userName == userName ? 
+            <div className="flex flex-col max-w-xs bg-black rounded-md border-2 border-black self-end">
+            {/* <div className="pl-2 pr-3 w-max text-red-400 text-sm font-bold">{payload.userName}</div> */}
+            <div className="bg-white pl-2 pr-3 py-1 rounded-[4px]">{payload.message}</div>
           </div>
+          :
+          <div key={index} className="flex flex-col w-fit max-w-xs bg-black rounded-md border-2 border-black">
+            <span className="pl-2 pr-3 text-yellow-400 text-sm font-bold">{payload.userName}</span>
+            <span className="bg-white pl-2 pr-3 py-1 rounded-[4px]">{payload.message}</span>
+          </div> 
           ))}
       </div>
 
