@@ -6,19 +6,25 @@ import { useSearchParams } from 'next/navigation'
 
 export default function chatroom() {
   const [message, setMessage] = useState('')
-  const [userName, setUserName] = useState('')
   const [messageArray, setMessageArray] = useState([])
   const searchParams = useSearchParams()
   const room = searchParams.get('room')
+  const userName = searchParams.get('user')
   
   const sendMessage = (e) => {
-    e.preventDefault()
+    //e.preventDefault()
     console.log(userName)
     socket.emit('chat', {message , userName, room})
+    console.log("got data")
+    socket.on('chat', (chats) => {
+      setMessageArray(chats)
+      console.log("Messages----", chats)
+    })
     setMessage('')
   }
 
   useEffect(() => {
+    console.log("got data")
     socket.on('chat', (chats) => {
       setMessageArray(chats)
       console.log("Messages----", chats)
@@ -26,27 +32,42 @@ export default function chatroom() {
   }, [])
   
   return (
-    <div className="flex flex-col items-center border-2 rounded-md border-black w-[30vw] min-w-fit h-[95vh] mx-auto my-4">
-      <h1 className="font-bold text-3xl m-5">Chat</h1>
-      {messageArray.map((payload, index) => (
-        <div key={index} className="flex justify-between border-y-2 border-black my-2 w-full">
-          <span className="px-3 py-1">
-            {payload.message}
-          </span>
-          <span className="px-3 py-1 text-white font-semibold bg-black">
-            {payload.userName}
-          </span>
+    <div className="flex flex-col border-2 border-black rounded-md w-[30vw] min-w-[320px] h-[95vh] mx-auto my-4">
+      <div className='flex flex-col gap-3 p-3'>
+            {/* style */}
+            <div  className="flex flex-col w-fit max-w-xs bg-black rounded-md border-2 border-black">
+              <span className="pl-2 pr-3 text-yellow-400 text-sm font-bold">
+                payload.userName
+              </span>
+              <span className="bg-white pl-2 pr-3 py-1 rounded-[4px]">
+                payload.message
+              </span>
+            </div>
+        <div className="flex flex-col max-w-xs bg-black rounded-md border-2 border-black self-end">
+          {/* <div className="pl-2 pr-3 w-max text-red-400 text-sm font-bold">
+            Milind
+          </div> */}
+          <div className="bg-white pl-2 pr-3 py-1 rounded-[4px]">
+            User 2's message.
+          </div>
         </div>
-        ))}
-      <form className="flex flex-col gap-3 w-full mt-auto" onSubmit={sendMessage}>
-        <div className="flex border-y-2 border-black">
-          <input className="px-3 py-1 focus:outline-none focus:bg-neutral-100 w-full" 
-          type="text" name="chat" placeholder="Enter message..." value={message} onChange={(e) => setMessage(e.target.value)} />
-          <button className="text-white font-semibold bg-black px-3 py-1" type="submit">Send</button>
-        </div>
-        <input className="px-3 pt-1 mb-1 border-t-2 border-black focus:outline-none focus:bg-white active:bg-white" 
-        type="text" name="user" placeholder="Enter your name..." value={userName} onChange={(e) => setUserName(e.target.value)} />
-      </form>
+        {messageArray.map((payload, index) => (
+          <div key={index} className="flex flex-col w-fit max-w-xs bg-black rounded-md border-2 border-black">
+            <span className="pl-2 pr-3 text-yellow-400 text-sm font-bold">
+              {payload.userName}
+            </span>
+            <span className="bg-white pl-2 pr-3 py-1 rounded-[4px]">
+              {payload.message}
+            </span>
+          </div>
+          ))}
+      </div>
+
+      <div className="flex gap-[3px] w-full mt-auto bg-black pt-[2px]">
+        <input className="px-3 py-1 focus:outline-none focus:bg-neutral-100 w-full rounded-[4px]" 
+        type="text" name="chat" placeholder="Enter message..." value={message} onChange={(e) => setMessage(e.target.value)} />
+        <button className="px-3 py-1 text-white font-semibold bg-black rounded-[4px]" onClick={() => sendMessage()}>Send</button>
+      </div>
     </div>
   )
 }
