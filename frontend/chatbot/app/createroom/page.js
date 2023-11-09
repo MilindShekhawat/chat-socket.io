@@ -4,24 +4,25 @@ import Link from "next/link"
 import Image from 'next/image'
 import back from '../img/back.png'
 import socket from '../lib/connection'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { nanoid } from 'nanoid'
 
 export default function createroompage() {
   const [roomId, setRoomId] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const userName = searchParams.get('user')
 
   function createRoom() {
     const room = nanoid()
     setRoomId(room)
-    socket.emit('create room', room)
-    console.log("Room - ", room)
+    socket.emit('create room', {userName, room})
   }
 
   function joinRoom() {
     console.log(`Room ${roomId} joined`)
-    socket.emit('join room', roomId)
-    router.push(`/chatroom?room=${roomId}`)
+    socket.emit('join room', {userName, roomId})
+    router.push(`/chatroom?user=${userName}&room=${roomId}`)
   }
 
   return (
@@ -32,7 +33,7 @@ export default function createroompage() {
       </Link>
       <div className="flex flex-col gap-3 justify-center items-center border-2 rounded-md border-black w-[20vw] min-w-[256px] h-[50vh] p-5">
         <span className='font-bold text-2xl mb-3'>Create Room</span>
-        <button className="text-white font-semibold rounded-sm bg-black border-2 border-white px-3 py-1 w-max
+        <button className="text-white font-semibold rounded-[4px] bg-black border-2 border-white px-3 py-1 w-max
         hover:text-black hover:bg-white hover:border-black" onClick={() => createRoom()}>Create Room</button>
         {roomId=='' ? '' :
         <>
