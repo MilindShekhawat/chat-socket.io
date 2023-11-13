@@ -20,7 +20,7 @@ export default function Home() {
       })
 
       socket.on("duplicate username", (payload) => {
-        setHasUserName(`Username ${payload.userName} aready exists.`)
+        setHasUserName(`Username ${payload.userName} is taken.`)
       })
     } else {
       setHasUserName(`Please enter a username`)
