@@ -31,24 +31,24 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id)
+    delete users[socket.id]
   })
 
   socket.on("username", (payload) => {
     //  Check if username exists. If it does not then add it.
-    if (!users.hasOwnProperty(payload.userName)) {
+    if (!isUserNameTaken(payload.userName)) {
       console.log("USERNAME- NEW USER")
       console.log(socket.id, "granted payload", payload)
-      users[payload.userName] = { roomId: null }
-      console.log(users)
-      console.log("New User", payload)
+      users[socket.id] = payload
+      console.log("Users", users)
       socket.emit("approved username")
     }
     //  If it does and its not in a room then let it be.
-    else if (users.hasOwnProperty(payload.userName) && users[payload.userName] == { roomId: null }) {
-      console.log("USERNAME - EXISTING USER")
-      console.log("Existing User", payload)
-      socket.emit("approved username")
-    }
+    // else if (isUserNameTaken(payload.userName) && users[socket.id].roomId == null) {
+    //   console.log("USERNAME - EXISTING USER")
+    //   console.log("Existing User", payload)
+    //   socket.emit("approved username")
+    // }
     // //TODO getting called unintentionally
     // else if (users.hasOwnProperty(payload.userName) && users[payload.userName].roomId == payload.roomId) {
     //   console.log("USERNAME -EXISTING USER IN A ROOM")
@@ -67,21 +67,21 @@ io.on("connection", (socket) => {
     //  Creates a room id only.
     console.log("CREATE ROOM")
     console.log("Room", payload.room, "created by", payload.userName)
-    rooms.push(payload.room)
+    users[socket.id].roomId = payload.room
   })
 
   socket.on("join room", (payload) => {
     // Checks if a room exists. If it does then let the users join.
-    if (rooms.includes(payload.roomId)) {
+    if (isRoomAvailable(payload.roomId)) {
       // If a user is not in any other room then they join.
-      if (users[payload.userName].roomId == null || users[payload.userName].roomId == payload.roomId) {
+      if (users[socket.id].roomId == null || users[socket.id].roomId == payload.roomId) {
         console.log("JOIN ROOM - ROOM EXISTS")
         // Give the newly joined user a color
-        if (users[payload.userName].color == null) {
+        if (users[socket.id].color == null) {
           const userColor = COLORS.pop()
-          users[payload.userName].color = userColor
+          users[socket.id].color = userColor
         }
-        users[payload.userName].roomId = payload.roomId
+        users[socket.id].roomId = payload.roomId
         console.log(users)
         console.log("User joined", payload)
         socket.join(payload.roomId)
@@ -90,7 +90,7 @@ io.on("connection", (socket) => {
       // if they are then do not.
       else {
         console.log("JOIN ROOM - USER IN DIFFERENT ROOM")
-        console.log("User", payload.userName, "is already in room", [payload.roomId])
+        console.log("User", payload.userName, "is already in room", payload.roomId)
         //TODO Currently no reference to this event on frontend
         socket.emit("already in room")
       }
@@ -103,8 +103,8 @@ io.on("connection", (socket) => {
     }
   })
   socket.on("chat", (payload) => {
-    if (payload.userName != null) {
-      const color = users[payload.userName].color
+    if (payload.userName) {
+      const color = users[socket.id].color
       chats.push({ ...payload, color })
     }
     console.log("Chats:", chats)
@@ -114,6 +114,23 @@ io.on("connection", (socket) => {
     )
   })
 })
+
+function isUserNameTaken(userName) {
+  for (const socketid in users) {
+    if (users[socketid].userName === userName) {
+      return true
+    }
+  }
+  return false
+}
+function isRoomAvailable(roomId) {
+  for (const socketid in users) {
+    if (users[socketid].roomId === roomId) {
+      return true
+    }
+  }
+  return false
+}
 
 server.listen(5000, () => {
   console.log("Server is listening at port 5000")
