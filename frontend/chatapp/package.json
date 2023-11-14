@@ -1,5 +1,5 @@
 {
-  "name": "chatbot",
+  "name": "chatapp",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,10 +10,11 @@
   },
   "dependencies": {
     "nanoid": "^5.0.2",
-    "next": "14.0.1",
+    "next": "^14.0.1",
     "react": "^18",
     "react-dom": "^18",
-    "socket.io-client": "^4.7.2"
+    "socket.io-client": "^4.7.2",
+    "tailwind": "^4.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.0.1",
