@@ -35,25 +35,27 @@ export default function chatroom() {
   }
 
   return (
-    <div className='flex flex-col border-2 border-black rounded-md w-[30vw] min-w-[320px] h-[95vh] mx-auto my-4'>
-      <div className='flex flex-col gap-3 p-3'>
-        {messageArray.map((payload, index) =>
-          payload.userName == userName ? (
-            <div className='flex flex-col max-w-xs bg-black rounded-md border-2 border-black self-end'>
-              {/* <div className="pl-2 pr-3 w-max text-red-400 text-sm font-bold">{payload.userName}</div> */}
-              <div className='bg-white pl-2 pr-3 py-1 rounded-[4px]'>{payload.message}</div>
-            </div>
-          ) : (
-            <div
-              key={index}
-              className='flex flex-col w-fit max-w-xs  bg-black rounded-md border-2 border-black'>
-              <span className={`pl-2 pr-3 text-sm font-bold ${payload.color}`}>{payload.userName}</span>
-              <span className='bg-white pl-2 pr-3 py-1 rounded-[4px]'>{payload.message}</span>
-            </div>
-          )
-        )}
+    <div className='flex flex-col border-2 justify-end border-black rounded-md w-[30vw] min-w-[320px] h-[95vh] mx-auto my-4'>
+      <div className='flex flex-col-reverse overflow-y-scroll scrollbar-thin scrollbar-thumb-rounded-sm scrollbar-thumb-black'>
+        <div className='flex flex-col gap-3 p-3'>
+          {messageArray.map((payload, index) =>
+            payload.userName == userName ? (
+              <div className='flex flex-col max-w-xs bg-black rounded-md border-2 border-black self-end'>
+                {/* <div className="pl-2 pr-3 w-max text-red-400 text-sm font-bold">{payload.userName}</div> */}
+                <div className='bg-white pl-2 pr-3 py-1 rounded-[4px]'>{payload.message}</div>
+              </div>
+            ) : (
+              <div
+                key={index}
+                className='flex flex-col w-fit max-w-xs bg-black rounded-md border-2 border-black'>
+                <span className={`${payload.color} pl-2 pr-3 text-sm font-bold`}>{payload.userName}</span>
+                <span className=' bg-white pl-2 pr-3 py-1 rounded-[4px]'>{payload.message}</span>
+              </div>
+            )
+          )}
+        </div>
       </div>
-      <div className='flex gap-[3px] w-full mt-auto bg-black pt-[2px]'>
+      <div className='flex gap-[3px] w-full bg-black pt-[2px]'>
         <input
           className='px-3 py-1 focus:outline-none focus:bg-neutral-100 w-full rounded-[4px]'
           type='text'
