@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 
 export default function joinroompage() {
   const [roomId, setRoomId] = useState("")
-  const [hasRoom, setHasRoom] = useState(true)
+  const [hasRoom, setHasRoom] = useState("")
   const router = useRouter()
   const searchParams = useSearchParams()
   const userName = searchParams.get("user")
@@ -21,9 +21,13 @@ export default function joinroompage() {
       console.log(`Room ${payload.roomId} joined by ${payload.userName}`)
       router.push(`/chatroom?user=${payload.userName}&room=${payload.roomId}`)
     })
-    socket.on("room not found", () => {
+    socket.on("room not found", (roomId) => {
       console.log(`Room is not available.`)
-      setHasRoom(false)
+      setHasRoom(`Room ${roomId} is not available.`)
+    })
+    socket.on("room full", (roomId) => {
+      console.log(`Room is full`)
+      setHasRoom(`Room ${roomId} is full`)
     })
   }
 
@@ -57,11 +61,11 @@ export default function joinroompage() {
           onClick={() => joinRoom()}>
           Join Room
         </button>
-        {hasRoom ? (
+        {!hasRoom ? (
           ""
         ) : (
           <span>
-            <span className='font-bold'>{roomId}</span> room is not available.
+            <span>{hasRoom}</span>
           </span>
         )}
       </div>
