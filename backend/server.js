@@ -30,9 +30,14 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id)
-    const releasedColor = users[socket.id].color
+    let releasedColor = ""
+    if (users[socket.id].hasOwnProperty("color")) {
+      releasedColor = users[socket.id].color
+    }
     delete users[socket.id]
-    COLORS.push(releasedColor)
+    if (releasedColor != "") {
+      COLORS.push(releasedColor)
+    }
   })
 
   socket.on("username", (payload) => {
