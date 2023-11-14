@@ -3,7 +3,6 @@ import { createServer } from "node:http"
 import { Server } from "socket.io"
 
 let chats = []
-let rooms = []
 let users = {}
 const COLORS = [
   "text-white",
@@ -31,7 +30,9 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id)
+    const releasedColor = users[socket.id].color
     delete users[socket.id]
+    COLORS.push(releasedColor)
   })
 
   socket.on("username", (payload) => {
@@ -81,25 +82,31 @@ io.on("connection", (socket) => {
           const userColor = COLORS.pop()
           users[socket.id].color = userColor
         }
-        users[socket.id].roomId = payload.roomId
-        console.log(users)
-        console.log("User joined", payload)
-        socket.join(payload.roomId)
-        socket.emit("join room", payload)
+        const usersInRoom = Object.values(users).filter((user) => user.roomId === payload.roomId)
+        if (usersInRoom.length < 10) {
+          users[socket.id].roomId = payload.roomId
+          console.log(users)
+          console.log("User joined", payload)
+          socket.join(payload.roomId)
+          socket.emit("join room", payload)
+        } else {
+          console.log("JOIN ROOM - ROOM IS FULL")
+          socket.emit("room full", payload.roomId)
+        }
       }
       // if they are then do not.
       else {
         console.log("JOIN ROOM - USER IN DIFFERENT ROOM")
         console.log("User", payload.userName, "is already in room", payload.roomId)
         //TODO Currently no reference to this event on frontend
-        socket.emit("already in room")
+        socket.emit("already in room", payload.roomId)
       }
     }
     // If there is no room, then return this.
     else {
       console.log("JOIN ROOM - ROOM DOES NOT EXIST")
       console.log("Room", payload.roomId, "not found.")
-      socket.emit("room not found")
+      socket.emit("room not found", payload.roomId)
     }
   })
   socket.on("chat", (payload) => {
